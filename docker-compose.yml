@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  database:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: student-database
+      ALLOW_IP_RANGE: 0.0.0.0/0
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U rm" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - '5432:5432'
+    networks:
+      - student-api-network
+    volumes:
+      - student-api-volumes:/var/lib/postgresql/data
+
+  database-admin:
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - database
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "6030:80"
+    networks:
+      - student-api-network
+    volumes:
+      - student-pgadmin-volumes:/var/lib/pgadmin
+
+networks:
+  student-api-network:
+
+volumes:
+  student-api-volumes:
+  student-pgadmin-volumes:
